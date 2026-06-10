@@ -51,7 +51,11 @@ function createAnnotatorWindow() {
     annotatorWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
   }
 
-  annotatorWindow.once('ready-to-show', () => annotatorWindow.show());
+  annotatorWindow.once('ready-to-show', () => {
+    annotatorWindow.show();
+    annotatorWindow.focus();
+    app.focus({ steal: true });
+  });
 
   annotatorWindow.on('closed', () => { annotatorWindow = null; });
 }
@@ -133,7 +137,14 @@ async function startCapture() {
   if (!sources.length) return;
   lastScreenshot = sources[0].thumbnail;
 
-  if (annotatorWindow) annotatorWindow.hide();
+  if (annotatorWindow && annotatorWindow.isVisible()) {
+    await new Promise((resolve) => {
+      annotatorWindow.once('hide', resolve);
+      annotatorWindow.hide();
+    });
+    // Wait for macOS hide animation to fully complete
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
   createOverlayWindow();
 }
 
