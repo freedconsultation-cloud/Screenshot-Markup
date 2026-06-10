@@ -49,8 +49,10 @@ export default function Overlay() {
         ctx.fillStyle = 'rgba(0,0,0,1)';
         ctx.fillRect(x, y, w, h);
         ctx.globalCompositeOperation = 'source-over';
-        // Redraw image in selection
-        ctx.drawImage(img, x, y, w, h, x, y, w, h);
+        // Redraw image in selection — scale source coords by DPR since
+        // the screenshot is captured at physical (Retina) resolution
+        const dpr = window.devicePixelRatio || 1;
+        ctx.drawImage(img, x * dpr, y * dpr, w * dpr, h * dpr, x, y, w, h);
         // Selection border
         ctx.strokeStyle = '#F88379';
         ctx.lineWidth = 2;
