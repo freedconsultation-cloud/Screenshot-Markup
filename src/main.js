@@ -125,6 +125,16 @@ async function startCapture() {
   const hasPermission = await checkScreenPermission();
   if (!hasPermission) return;
 
+  // Hide window BEFORE taking the screenshot
+  if (annotatorWindow && annotatorWindow.isVisible()) {
+    await new Promise((resolve) => {
+      annotatorWindow.once('hide', resolve);
+      annotatorWindow.hide();
+    });
+    // Wait for macOS window-hide animation to fully clear the screen
+    await new Promise((resolve) => setTimeout(resolve, 400));
+  }
+
   const display = screen.getPrimaryDisplay();
   const { width, height } = display.size;
   const scaleFactor = display.scaleFactor;
@@ -137,14 +147,6 @@ async function startCapture() {
   if (!sources.length) return;
   lastScreenshot = sources[0].thumbnail;
 
-  if (annotatorWindow && annotatorWindow.isVisible()) {
-    await new Promise((resolve) => {
-      annotatorWindow.once('hide', resolve);
-      annotatorWindow.hide();
-    });
-    // Wait for macOS hide animation to fully complete
-    await new Promise((resolve) => setTimeout(resolve, 250));
-  }
   createOverlayWindow();
 }
 
